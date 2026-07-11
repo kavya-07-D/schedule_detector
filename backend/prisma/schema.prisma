@@ -1,0 +1,131 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  role      String   // "ADMIN", "HOD", "FACULTY"
+  facultyId String?  @unique
+  faculty   Faculty? @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Department {
+  id        String    @id
+  name      String
+  hodId     String?
+  faculties Faculty[]
+  subjects  Subject[]
+  rooms     Room[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Faculty {
+  id               String          @id
+  name             String
+  email            String          @unique
+  departmentId     String
+  department       Department      @relation(fields: [departmentId], references: [id])
+  weeklyWorkload   Int             @default(0)
+  maxWorkload      Int             @default(18) // maximum periods per week
+  availablePeriods String          @default("[]") // JSON string of available period slots (e.g., "[1,2,3,4,5,6]")
+  preferredHours   String          @default("[]") // JSON string of preferred periods
+  status           String          @default("PRESENT") // "PRESENT", "ABSENT", "LEAVE"
+  user             User?
+  leaveRequests    LeaveRequest[]
+  primarySubjects  Subject[]       @relation("PrimaryFaculty")
+  secondarySubjects Subject[]      @relation("SecondaryFaculty")
+  reserveSubjects   Subject[]      @relation("ReserveFaculty")
+  slots            TimetableSlot[] @relation("AssignedFaculty")
+  originalSlots    TimetableSlot[] @relation("OriginalFaculty")
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+model Subject {
+  id                 String          @id
+  name               String
+  code               String          @unique
+  departmentId       String
+  department         Department      @relation(fields: [departmentId], references: [id])
+  primaryFacultyId   String
+  primaryFaculty     Faculty         @relation("PrimaryFaculty", fields: [primaryFacultyId], references: [id])
+  secondaryFacultyId String
+  secondaryFaculty   Faculty         @relation("SecondaryFaculty", fields: [secondaryFacultyId], references: [id])
+  reserveFacultyId   String
+  reserveFaculty     Faculty         @relation("ReserveFaculty", fields: [reserveFacultyId], references: [id])
+  isLab              Boolean         @default(false)
+  weeklyPeriods      Int             @default(4)
+  slots              TimetableSlot[]
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+}
+
+model Room {
+  id           String          @id
+  name         String
+  type         String          // "CLASSROOM", "LAB"
+  capacity     Int
+  departmentId String?
+  department   Department?     @relation(fields: [departmentId], references: [id])
+  slots        TimetableSlot[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model TimetableSlot {
+  id                String    @id @default(uuid())
+  day               Int       // 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday
+  period            Int       // 1, 2, 3, 4, 5, 6 (teaching hours)
+  departmentId      String
+  classId           String    // e.g. "CSE-3A", "ECE-2B"
+  subjectId         String
+  subject           Subject   @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  facultyId         String
+  faculty           Faculty   @relation("AssignedFaculty", fields: [facultyId], references: [id], onDelete: Cascade)
+  originalFacultyId String?
+  originalFaculty   Faculty?  @relation("OriginalFaculty", fields: [originalFacultyId], references: [id])
+  roomId            String
+  room              Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  isLab             Boolean   @default(false)
+  isRescheduled     Boolean   @default(false)
+  reason            String?   // e.g. "Faculty Absent - Reassigned to Secondary"
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@unique([day, period, classId])
+  @@unique([day, period, facultyId])
+  @@unique([day, period, roomId])
+}
+
+model LeaveRequest {
+  id            String   @id @default(uuid())
+  facultyId     String
+  faculty       Faculty  @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  startDate     String   // YYYY-MM-DD
+  endDate       String   // YYYY-MM-DD
+  reason        String
+  status        String   @default("PENDING") // "PENDING", "APPROVED", "REJECTED"
+  statusMessage String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  message   String
+  type      String   // "INFO", "ALERT", "SUCCESS"
+  isRead    Boolean  @default(false)
+  role      String   @default("ALL") // "ALL", "ADMIN", "HOD", "FACULTY"
+  userId    String?
+  createdAt DateTime @default(now())
+}
