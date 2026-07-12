@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_URL } from '../config';
 import { useSocket } from '../context/SocketContext';
 import { 
   Users, UserCheck, UserX, Calendar, RefreshCw, 
@@ -42,10 +43,10 @@ export const Dashboard: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      const resData = await fetch('http://localhost:5000/api/analytics', {
+      const resData = await fetch(`${API_URL}/api/analytics`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const resFaculty = await fetch('http://localhost:5000/api/faculty', {
+      const resFaculty = await fetch(`${API_URL}/api/faculty`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -82,7 +83,7 @@ export const Dashboard: React.FC = () => {
     const nextStatus = currentStatus === 'PRESENT' ? 'ABSENT' : 'PRESENT';
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:5000/api/faculty/${facultyId}/status`, {
+      const res = await fetch(`${API_URL}/api/faculty/${facultyId}/status`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

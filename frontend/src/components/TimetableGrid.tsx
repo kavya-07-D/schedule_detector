@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_URL } from '../config';
 import { useSocket } from '../context/SocketContext';
 import { Calendar, User, Home, Award, Download, RefreshCw, AlertCircle, CheckCircle2 } from 'lucide-react';
 
@@ -49,10 +50,10 @@ export const TimetableGrid: React.FC = () => {
 
   const fetchFilters = async () => {
     try {
-      const resFaculty = await fetch('http://localhost:5000/api/faculty', {
+      const resFaculty = await fetch(`${API_URL}/api/faculty`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const resRooms = await fetch('http://localhost:5000/api/analytics', { // reuse analytics to fetch rooms or hardcode
+      const resRooms = await fetch(`${API_URL}/api/analytics`, { // reuse analytics to fetch rooms or hardcode
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -90,7 +91,7 @@ export const TimetableGrid: React.FC = () => {
       else if (filterType === 'ROOM') queryParam = `roomId=${filterValue}`;
       else if (filterType === 'DEPT') queryParam = `departmentId=${filterValue}`;
 
-      const res = await fetch(`http://localhost:5000/api/timetable?${queryParam}`, {
+      const res = await fetch(`${API_URL}/api/timetable?${queryParam}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -158,7 +159,7 @@ export const TimetableGrid: React.FC = () => {
       const draggedSlot = slots.find(s => s.id === slotId);
       if (!draggedSlot) return;
 
-      const res = await fetch('http://localhost:5000/api/timetable/reschedule', {
+      const res = await fetch(`${API_URL}/api/timetable/reschedule`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -195,7 +196,7 @@ export const TimetableGrid: React.FC = () => {
         ? user.facultyId.split('_')[0] 
         : 'CSE'; // default or match user department
 
-      const res = await fetch('http://localhost:5000/api/timetable/regenerate', {
+      const res = await fetch(`${API_URL}/api/timetable/regenerate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

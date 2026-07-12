@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
+import { API_URL } from '../config';
 
 export interface AppNotification {
   id: string;
@@ -43,7 +44,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const refreshNotifications = async () => {
     if (!token) return;
     try {
-      const res = await fetch('http://localhost:5000/api/notifications', {
+      const res = await fetch(`${API_URL}/api/notifications`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -64,7 +65,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       return;
     }
 
-    const socketUrl = 'http://localhost:5000';
+    const socketUrl = API_URL;
     const newSocket = io(socketUrl, {
       transports: ['websocket', 'polling']
     });

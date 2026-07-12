@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_URL } from '../config';
 import { useSocket } from '../context/SocketContext';
 import { Calendar, User, FileText, CheckCircle2, XCircle, AlertCircle, Clock } from 'lucide-react';
 
@@ -30,7 +31,7 @@ export const LeavePanel: React.FC = () => {
   const fetchLeaves = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/leave', {
+      const res = await fetch(`${API_URL}/api/leave`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -64,7 +65,7 @@ export const LeavePanel: React.FC = () => {
 
     setSubmitting(true);
     try {
-      const res = await fetch('http://localhost:5000/api/leave', {
+      const res = await fetch(`${API_URL}/api/leave`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +96,7 @@ export const LeavePanel: React.FC = () => {
     setLoading(true);
     try {
       const statusMessage = status === 'APPROVED' ? 'Approved by HOD' : 'Rejected by HOD';
-      const res = await fetch(`http://localhost:5000/api/leave/${id}/approve`, {
+      const res = await fetch(`${API_URL}/api/leave/${id}/approve`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

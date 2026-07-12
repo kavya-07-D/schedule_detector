@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_URL } from '../config';
 import { useSocket } from '../context/SocketContext';
 import { Shield, BookOpen, Layers, Users, Sliders, CheckCircle2, AlertTriangle, Plus, Home } from 'lucide-react';
 
@@ -55,8 +56,8 @@ export const AdminConsole: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const resFaculty = await fetch('http://localhost:5000/api/faculty', { headers: { Authorization: `Bearer ${token}` } });
-      const resTimetable = await fetch('http://localhost:5000/api/timetable', { headers: { Authorization: `Bearer ${token}` } });
+      const resFaculty = await fetch(`${API_URL}/api/faculty`, { headers: { Authorization: `Bearer ${token}` } });
+      const resTimetable = await fetch(`${API_URL}/api/timetable`, { headers: { Authorization: `Bearer ${token}` } });
       
       if (resFaculty.ok) {
         const facs = await resFaculty.json();
